@@ -1,0 +1,1 @@
+For far-field, we consider $z \gg \sqrt{x^2 + y^2}$, which is the paraboloidal approximation $$\int_{\theta=0}^{2\pi}\int_{\rho=0}^\infty f(\rho,\theta).\frac{\exp(i\vec{k}.\vec{r})}{r} \rho d\rho d\theta = $$

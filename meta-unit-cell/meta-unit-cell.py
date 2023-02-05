@@ -61,7 +61,7 @@ def main(args):
     src_fcen = 0.001#0.005#0.05 #0.5#0.001
     src_df = src_fcen/2 #0.07#0.0005
     run_time=100
-    
+    monitor_z = 0.9*d_padding
     # =================================
     cell_a = srr_sq_outer+srr_track
     cell = mp.Vector3(cell_a,cell_a,2*d_padding+2*d_pml)
@@ -72,7 +72,8 @@ def main(args):
     ]
     # if(srr_gap!=0):
     
-    # SOURCES
+    # SOURCES =================================================================
+    
     sources = [
         mp.Source(
             src=mp.ContinuousSource(frequency=src_fcen,fwidth=src_df),
@@ -82,6 +83,7 @@ def main(args):
         )
     ]
     
+    #FIXME: GAUSSIAN SOURCE YIELDS AN ALMOST EMTPY SOLUTION
     # sources = [
     #     mp.Source(
     #         src=mp.GaussianSource(src_fcen,src_df),
@@ -92,6 +94,10 @@ def main(args):
     # ]
 
     pml_layers = [mp.PML(thickness=d_pml, direction=mp.Z)]
+    
+    fr_tran = mp.FluxRegion(size=mp.Vector3(cell_a,cell_a,0), center=mp.Vector3(0,0,monitor_z))
+    fr_refl = mp.FluxRegion(size=mp.Vector3(cell_a,cell_a,0), center=mp.Vector3(0,0,-monitor_z))
+    
     sim = mp.Simulation(
         cell_size=cell,
         geometry=geometry,
@@ -124,7 +130,7 @@ def main(args):
     # sim.plot2D(fields=mp.Ex, output_plane=vol_srr)
     # plt.show()
 
-    # f2 = plt.figure()
+    # f4 = plt.figure()
     # num_z = int(cell.z*resolution)
     # print(f'num_z is {num_z}')
     # temp = sim.get_array(component=mp.Ex)
@@ -133,10 +139,19 @@ def main(args):
     # arrowY = sim.get_array(component=mp.Ey)[:,:,int(num_z/2)]
     # plt.quiver(arrowX,arrowY)
 
-    plt.show()
-    # pdb.set_trace()  
+    # plt.show()
 
-    return sim
+    nfreq = 101
+    flux_tran = sim.add_flux(src_fcen, src_df, nfreq, fr_tran)
+    flux_refl = sim.add_flux(src_fcen, src_df, nfreq, fr_refl)
+    # pdb.set_trace()
+
+    data_tran = mp.get_fluxes(flux_tran)
+    f5 = plt.figure()
+    plt.plot(flux_tran.freq, data_tran)
+    plt.show()
+
+    return sim, flux_tran, flux_refl
 
 def plotXSlice(sim, x=0, component=mp.Ex):
     vol = mp.Volume(size=mp.Vector3(0,sim.cell_size.y,sim.cell_size.z),center=mp.Vector3(x,0,0))
@@ -162,7 +177,7 @@ if __name__ == '__main__':
     # parser.add_argument("--df", type=float, default=1.5*(c/a))
 
     args = parser.parse_args()
-    sim = main(args)
+    sim, flux_tran, flux_refl = main(args)
     #TODO: main(args, srr_params), srr_params can be loaded from a config yaml
     #TODO: Sanity checks on arguments
 

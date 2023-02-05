@@ -2,6 +2,27 @@ import meep as mp
 import numpy as np
 import matplotlib.pyplot as plt
 
+# Atom-specific paramaters
+# |<------------ srr_sq_outer ------------->|
+#  ___________________________________  ______
+# |///////////////////////////////////|     |
+# |///////////////////////////////////|     |
+# |///////////////////////////////////|     |
+# |///////// _______________ /////////|     |
+# |<d_track>|               |/////////|     |
+# |/////////|               |/////////|     |
+# |/////////|               |/////////|   srr_sq_outer
+# |/////////|               |/////////|     |
+# |/////////|               |/////////|     |
+# |/////////|               |/////////|     |
+# |/////////|_____     _____|/////////|     |
+# |///////////////|   |///////////////|     |
+# |///////////////|   |///////////////|     |
+# |///////////////|   |///////////////|     |
+# |_______________|   |_______________|_____|____
+#                 |<->|
+#                 srr_gap
+
 def main(args):
     resolution = args.resolution
     no_sim = args.no_sim
@@ -51,9 +72,6 @@ def main(args):
         k_point=mp.Vector3(0,0,0)
     )
 
-    run_sim=True
-    # run_sim=False
-
     if(not(no_sim)):
         sim.run(until=30)
 
@@ -71,7 +89,6 @@ def main(args):
     vol_srr = mp.Volume(size=mp.Vector3(cell_a,cell_a,0),center=mp.Vector3(0,0,0))
     sim.plot2D(fields=mp.Ex, output_plane=vol_srr)
     # plt.show()
-
 
     # def showVectorField2D(volume,vector='E'):
     #     # returns a plot object
@@ -92,6 +109,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
     main(args)
 
+#TODO: main(args, srr_params), srr_params can be loaded from a config yaml
+#TODO: Sanity checks on arguments
 
 # The quiver plot is misaligned. These corrections need to be done
 # Flip along Y axis

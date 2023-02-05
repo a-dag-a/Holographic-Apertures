@@ -91,7 +91,6 @@ def main(args):
     #     )
     # ]
 
-    # NOTE: CURRENTLY THE PERIODIC BOUNDARY CONDITION IS NOT DONE RIGHT.
     pml_layers = [mp.PML(thickness=d_pml, direction=mp.Z)]
     sim = mp.Simulation(
         cell_size=cell,

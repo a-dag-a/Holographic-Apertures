@@ -29,8 +29,9 @@ a = 1e-6
 def main(args):
     # resolution = args.resolution
     no_sim = args.no_sim
+    normalizationRun = args.normalizationRun
     print(f'no_sim flag is {no_sim}')    
-    
+    sim_dump_dir = 'sim_dump' if normalizationRun else 'sim_norm_dump'
 
     # Parse the frequency range for the input pulse
     # a = 1e-6
@@ -60,16 +61,18 @@ def main(args):
 
     src_fcen = 0.001#0.005#0.05 #0.5#0.001
     src_df = src_fcen/2 #0.07#0.0005
-    run_time=100
-    monitor_z = 0.9*d_padding
+    run_time=30
+    monitor_z = 0.5*d_padding
     # =================================
     cell_a = srr_sq_outer+srr_track
     cell = mp.Vector3(cell_a,cell_a,2*d_padding+2*d_pml)
-    geometry = [
-        mp.Block(size=mp.Vector3(srr_sq_outer,srr_sq_outer,0),center=mp.Vector3(0,0,0),material=mp.metal),
-        mp.Block(size=mp.Vector3(srr_sq_inner,srr_sq_inner,0),center=mp.Vector3(0,0,0),material=mp.air),
-        mp.Block(size=mp.Vector3(srr_gap,srr_track,0),center=mp.Vector3(0,-srr_sq_outer/2+srr_track/2,0),material=mp.air)
-    ]
+    geometry = []
+    if(not(normalizationRun)):
+        geometry = [
+            mp.Block(size=mp.Vector3(srr_sq_outer,srr_sq_outer,0),center=mp.Vector3(0,0,0),material=mp.metal),
+            mp.Block(size=mp.Vector3(srr_sq_inner,srr_sq_inner,0),center=mp.Vector3(0,0,0),material=mp.air),
+            mp.Block(size=mp.Vector3(srr_gap,srr_track,0),center=mp.Vector3(0,-srr_sq_outer/2+srr_track/2,0),material=mp.air)
+        ]
     # if(srr_gap!=0):
     
     # SOURCES =================================================================
@@ -95,8 +98,8 @@ def main(args):
 
     pml_layers = [mp.PML(thickness=d_pml, direction=mp.Z)]
     
-    fr_tran = mp.FluxRegion(size=mp.Vector3(cell_a,cell_a,0), center=mp.Vector3(0,0,monitor_z))
-    fr_refl = mp.FluxRegion(size=mp.Vector3(cell_a,cell_a,0), center=mp.Vector3(0,0,-monitor_z))
+    fr_tran = mp.FluxRegion(size=mp.Vector3(cell_a,cell_a,0), center=mp.Vector3(0,0,monitor_z), direction=mp.Z)
+    fr_refl = mp.FluxRegion(size=mp.Vector3(cell_a,cell_a,0), center=mp.Vector3(0,0,-monitor_z), direction=mp.Z)
     
     sim = mp.Simulation(
         cell_size=cell,
@@ -113,10 +116,10 @@ def main(args):
         sim.run(until=run_time)
 
         # DUMP SIMULATION STATE AND DATA
-        sim.dump(dirname='./sim_dump')
+        sim.dump(dirname=sim_dump_dir)
     else:
         # LOAD SIMULATION DATA
-        sim.load(dirname='./sim_dump')
+        sim.load(dirname=sim_dump_dir)
     
     print(f'resolution is {resolution}')
     # PLOTTING THE VECTOR FIELD
@@ -161,18 +164,19 @@ def plotXSlice(sim, x=0, component=mp.Ex):
 def plotYSlice(sim, y=0, component=mp.Ex):
     vol = mp.Volume(size=mp.Vector3(sim.cell_size.x,0,sim.cell_size.z),center=mp.Vector3(0,y,0))
     sim.plot2D(fields=mp.Ex, output_plane=vol)
-    plt.title(f'Y Slice at x = {y}')
+    plt.title(f'Y Slice at y = {y}')
 
 def plotZSlice(sim, z=0, component=mp.Ex):
     vol = mp.Volume(size=mp.Vector3(sim.cell_size.x,sim.cell_size.y,0),center=mp.Vector3(0,0,z))
     sim.plot2D(fields=mp.Ex, output_plane=vol)
-    plt.title(f'Z    Slice at x = {z}')
+    plt.title(f'Z Slice at z = {z}')
 
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--resolution", type=int, default=10)
     parser.add_argument("--no-sim", type=int, default=0)
+    parser.add_argument("--normalizationRun", type=int, default=0)
     # parser.add_argument("--fcen", type=float, default=3*(c/a))
     # parser.add_argument("--df", type=float, default=1.5*(c/a))
 

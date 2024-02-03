@@ -1,5 +1,7 @@
-The idea here is that
-
+## Update (3 Feb 2024)
+Finally have a good way of thinking about the frequwncy selectivity problem (why is the ckt model frequency selective while the gemepetric aperture-FFT picture not frequency slecetive).
+It is not correct to think that there is no 'resonance' behaviour (ie sudden opacity at some frequency) in the gemeotric aperture-FFT picture. Imagine sweeping the wavelength from 0 to a large value. Initially the far field FT will look like a 'clean' image of the aperture (it's FT imaged at small wavelength). As wavelength approaches some critical dimension of the aperture (eg wavelength = diameter of circular aperture) there will be complete opacity. This goes away at longer wvelengths.
+	To complete the argument, consider the real life behaviour of a microwave door screen. The holes are apertures that allow BOTH (utlra small wavelength) and low freq RF (very long wavelength) to pass through. But it is OPAQUE at a particular frequency of 2.4GHz! There you go. 
 
 
 
